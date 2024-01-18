@@ -113,34 +113,44 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    
-    def do_create(self, args):
-        """Create an object of any class"""
-        try:
-            if not args:
-                raise SyntaxError("** class name missing **")
+    def do_create(self, arg):
+    """Create an object with given parameters."""
+    if not arg:
+        print("** class name missing **")
+        return
 
-            arg_list = args.split(" ")
-            class_name = arg_list[0]
+    args = arg.split()
+    class_name = args[0]
 
-            if class_name not in HBNBCommand.classes:
-                raise NameError("** class doesn't exist **")
+    if class_name not in HBNBCommand.classes:
+        print("** class doesn't exist **")
+        return
 
-            kw = {}
-            for arg in arg_list[1:]:
-                key, value = arg.split("=")
-                value = eval(value)
-                if isinstance(value, str):
-                    value = value.replace("_", " ").replace('"', '\\"')
-                kw[key] = value
-        except SyntaxError as e:
-            print(e)
-        except NameError as e:
-            print(e)
+    args = args[1:]
+    parameters = {}
+
+    for param in args:
+        # Split parameter into key and value
+        key, value = param.split('=')
+
+        # Handle string values
+        if value[0] == '"' and value[-1] == '"':
+            value = value[1:-1].replace('_', ' ').replace('\\"', '"')
+
+        # Handle float values
+        elif '.' in value and all(char.isdigit() or char == '.' for char in value):
+            value = float(value)
+
+        # Handle integer values
+        elif value.isdigit():
+            value = int(value)
+
+        # Skip invalid parameters
         else:
-            new_instance = HBNBCommand.classes[class_name](**kw)
-            new_instance.save()
-            print(new_instance.id)
+            print(f"Skipping invalid parameter: {param}")
+            continue
+
+        parameters[key] = value
 
     def help_create(self):
         """ Help information for the create method """
