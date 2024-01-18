@@ -6,7 +6,6 @@ from sqlalchemy.orm import relationship
 from models.place import Place
 from sqlalchemy.ext.declarative import declarative_base
 
-Base = declarative_base()
 
 class City(BaseModel, Base):
     """ The city class, contains state ID and name """
@@ -17,4 +16,7 @@ class City(BaseModel, Base):
 
     places = relationship('Place', backref='cities',
                           cascade='all, delete-orphan')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
