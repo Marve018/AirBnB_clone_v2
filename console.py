@@ -114,6 +114,22 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
+    def check_value_type(self, value):
+        """checks the type of value"""
+        arg = ""
+        if value[0] == '"' and value[-1] == '"':
+
+            for i in range(1, len(value) - 1):
+                if value[i] == "_":
+                    arg += " "
+                    continue
+                arg += value[i]
+            return arg
+        elif value.find(".") != -1:
+            return float(value)
+        else:
+            return int(value)
+
     def do_create(self, args):
         """ Create an object of any class"""
         if len(args) == 0:
