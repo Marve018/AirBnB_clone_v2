@@ -49,3 +49,23 @@ class Place(BaseModel, Base):
                 if obj.place_id == self.id:
                     reviews_list.append(obj)
             return reviews_list
+
+        @property
+        def amenities(self):
+            """
+            returns the list of Amenity instances based on the attribute
+            amenity_ids that contains all Amenity.id linked to the Place
+            """
+            from models import storage
+            amenity_instances = storage.all("Amenity").values()
+            return [amenity for amenity in amenity_instances
+                    if amenity.id in self.amenity_ids]
+
+        @amenities.setter
+        def amenities(self, obj):
+            """Setter attribute amenities that handles append method
+            for adding an Amenity.id to the attribute amenity_ids.
+            """
+            from models.amenity import Amenity
+            if isinstance(obj, Amenity):
+                self.amenity_ids.append(obj.id)
