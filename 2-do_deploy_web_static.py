@@ -9,6 +9,7 @@ import os
 env.hosts = ['34.207.58.155', '54.160.85.28']
 env.user = 'ubuntu'
 
+
 def do_deploy(archive_path):
     """
     Distribute an archive to web servers.
@@ -22,7 +23,8 @@ def do_deploy(archive_path):
     try:
         # Check if the archive file exists
         if not os.path.exists(archive_path):
-            raise FileNotFoundError("Error: Archive not found at {}".format(archive_path))
+            raise FileNotFoundError("Error: Archive not found at {}"
+                                    .format(archive_path))
 
         # Extract necessary information from the archive path
         archive_filename = os.path.basename(archive_path)
@@ -43,7 +45,8 @@ def do_deploy(archive_path):
         run("sudo rm {}".format(tmp_archive_path))
 
         # Move the contents to the release folder and clean up
-        run("sudo mv -f {}web_static/* {}".format(release_folder, release_folder))
+        run("sudo mv -f {}web_static/* {}"
+            .format(release_folder, release_folder))
         run("sudo rm -rf {}web_static".format(release_folder))
 
         # Remove the old /data/web_static/current symbolic link
