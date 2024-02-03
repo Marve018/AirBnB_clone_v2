@@ -4,7 +4,7 @@ Fabric script to distribute an archive to web servers using do_deploy function.
 """
 
 from fabric.api import run, put, sudo, env
-from os.path import exists
+import os
 
 env.hosts = ['34.207.58.155', '54.160.85.28']
 env.user = 'ubuntu'
@@ -19,32 +19,40 @@ def do_deploy(archive_path):
     Returns:
         bool: True if all operations were successful, False otherwise.
     """
-    if not exists(archive_path):
-        print("Error: Archive not found at {}".format(archive_path))
-        return False
-
     try:
+        # Check if the archive file exists
+        if not os.path.exists(archive_path):
+            raise FileNotFoundError("Error: Archive not found at {}".format(archive_path))
+
+        # Extract necessary information from the archive path
+        archive_filename = os.path.basename(archive_path)
+        tmp_archive_path = "/tmp/{}".format(archive_filename)
+        folder = archive_filename.split('.')[0]
+        release_folder = "/data/web_static/releases/{}/".format(folder)
+
         # Upload the archive to /tmp/ directory on the web server
-        put(archive_path, '/tmp/')
+        put(archive_path, tmp_archive_path)
 
-        # Extract the archive to /data/web_static/releases/
-        archive_basename = archive_path.split('/')[-1]
-        release_folder = '/data/web_static/releases/{}'.format(archive_basename.split(".")[0])
-        sudo('mkdir -p {}'.format(release_folder))
-        sudo('tar -xzf /tmp/{} -C {}'.format(archive_basename, release_folder))
+        # Create the release folder if it doesn't exist
+        run("sudo mkdir -p {}".format(release_folder))
 
-        # Remove the archive from the web server
-        sudo('rm /tmp/{}'.format(archive_basename))
+        # Extract the archive to the release folder
+        run("sudo tar -xzf {} -C {}".format(tmp_archive_path, release_folder))
 
-        # Delete the symbolic link /data/web_static/current
-        current_link = '/data/web_static/current'
-        if exists(current_link):
-            sudo('rm {}'.format(current_link))
+        # Remove the temporary archive file
+        run("sudo rm {}".format(tmp_archive_path))
 
-        # Create a new symbolic link
-        sudo('ln -s {} {}'.format(release_folder, current_link))
+        # Move the contents to the release folder and clean up
+        run("sudo mv -f {}web_static/* {}".format(release_folder, release_folder))
+        run("sudo rm -rf {}web_static".format(release_folder))
 
-        print("New version deployed successfully!")
+        # Remove the old /data/web_static/current symbolic link
+        run("sudo rm -rf /data/web_static/current")
+
+        # Create a new symbolic link pointing to the new release
+        run("sudo ln -s {} /data/web_static/current".format(release_folder))
+
+        print("Deployment successful!")
         return True
 
     except Exception as e:
