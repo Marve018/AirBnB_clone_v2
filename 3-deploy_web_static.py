@@ -36,6 +36,7 @@ def do_pack():
     else:
         return os.path.abspath('versions/{}'.format(archive_name))
 
+
 def do_deploy(archive_path):
     """
     Distribute an archive to web servers.
@@ -87,6 +88,7 @@ def do_deploy(archive_path):
     except Exception as e:
         print("Error during deployment: {}".format(str(e)))
         return False
+
 
 def deploy():
     """
