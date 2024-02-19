@@ -11,6 +11,7 @@ from models.amenity import Amenity
 
 app = Flask(__name__)
 
+
 @app.route("/hbnb_filters", strict_slashes=False)
 def index():
     """Display an HTML Page as text"""
@@ -19,10 +20,12 @@ def index():
     return render_template("10-hbnb_filters.html", states=states,
                            amenities=amenities)
 
+
 @app.teardown_appcontext
 def teardown(excep):
     """Call Storage.close method"""
     storage.close()
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
